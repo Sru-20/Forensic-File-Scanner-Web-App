@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forensic File Scanner | Digital Evidence Analysis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --accent-color: #e53e3e;
+            --light-color: #f7fafc;
+            --dark-color: #2d3748;
+            --success-color: #38a169;
+            --warning-color: #d69e2e;
+            --danger-color: #e53e3e;
+            --sidebar-width: 250px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #edf2f7;
+            color: #2d3748;
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            height: 100vh;
+            position: fixed;
+            overflow-y: auto;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .logo-icon {
+            font-size: 24px;
+        }
+        
+        .logo-text {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .nav-icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .header {
+            background-color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .content-area {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 20px;
+        }
+        
+        h3 {
+            color: var(--dark-color);
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: var(--secondary-color);
+            background-color: rgba(43, 108, 176, 0.05);
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            margin-bottom: 15px;
+            color: #4a5568;
+        }
+        
+        .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2c5282;
+        }
+        
+        .btn-secondary {
+            background-color: #a0aec0;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #718096;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c53030;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .selected-file {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .file-icon {
+            color: var(--secondary-color);
+        }
+        
+        .scan-results {
+            display: none;
+        }
+        
+        .result-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            padding: 20px;
+            border-radius: 6px;
+            text-align: center;
+            color: white;
+        }
+        
+        .summary-card.total {
+            background-color: var(--primary-color);
+        }
+        
+        .summary-card.safe {
+            background-color: var(--success-color);
+        }
+        
+        .summary-card.suspicious {
+            background-color: var(--warning-color);
+        }
+        
+        .summary-card.malicious {
+            background-color: var(--danger-color);
+        }
+        
+        .summary-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .result-details {
+            margin-top: 30px;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-name {
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+        }
+        
+        .detail-value.safe {
+            color: var(--success-color);
+        }
+        
+        .detail-value.suspicious {
+            color: var(--warning-color);
+        }
+        
+        .detail-value.malicious {
+            color: var(--danger-color);
+        }
+        
+        .progress-container {
+            margin: 30px 0;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e2e8f0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: var(--secondary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #718096;
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .history-table th, .history-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .history-table th {
+            background-color: #f7fafc;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .history-table tr:hover {
+            background-color: #f7fafc;
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-safe {
+            background-color: rgba(56, 161, 105, 0.1);
+            color: var(--success-color);
+        }
+        
+        .status-suspicious {
+            background-color: rgba(214, 158, 46, 0.1);
+            color: var(--warning-color);
+        }
+        
+        .status-malicious {
+            background-color: rgba(229, 62, 62, 0.1);
+            color: var(--danger-color);
+        }
+        
+        .settings-form {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .form-control {
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .checkbox {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .recent-scans {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #718096;
+            font-size: 14px;
+            margin-top: 40px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .tab-container {
+            margin-top: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .page-content {
+            display: none;
+        }
+        
+        .page-content.active {
+            display: block;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+        
+        @media (max-width: 1024px) {
+            .content-area {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .result-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo">
+            <div class="logo-icon"><i class="fas fa-search"></i></div>
+            <div class="logo-text">Forensic Scanner</div>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a class="nav-link active" data-page="dashboard">
+                    <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-page="scanner">
+                    <span class="nav-icon"><i class="fas fa-search"></i></span>
+                    <span class="nav-text">File Scanner</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-page="history">
+                    <span class="nav-icon"><i class="fas fa-history"></i></span>
+                    <span class="nav-text">Scan History</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-page="settings">
+                    <span class="nav-icon"><i class="fas fa-cog"></i></span>
+                    <span class="nav-text">Settings</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-page="help">
+                    <span class="nav-icon"><i class="fas fa-question-circle"></i></span>
+                    <span class="nav-text">Help & Support</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span class="page-title" id="pageTitle">Dashboard</span>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">JD</div>
+                <div>John Doe</div>
+            </div>
+        </div>
+        
+        <!-- Dashboard Page -->
+        <div class="page-content active" id="dashboard">
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-label">Total Files Scanned</div>
+                    <div class="stat-value">1,247</div>
+                    <div class="stat-desc">+12% from last month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Threats Detected</div>
+                    <div class="stat-value">38</div>
+                    <div class="stat-desc">-5% from last month</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Welcome to Forensic File Scanner</h2>
+                <p>This professional digital forensics tool helps you analyze files for potential security threats, extract metadata, and identify suspicious patterns. Our advanced scanning algorithms examine file structures, signatures, and behavioral patterns to detect malware, suspicious code, and other security concerns.</p>
+                
+                <div style="margin-top: 20px;">
+                    <h3>Quick Actions</h3>
+                    <div style="display: flex; gap: 15px; margin-top: 15px;">
+                        <button class="btn" id="quickScanBtn">New Scan</button>
+                        <button class="btn btn-secondary" id="quickHistoryBtn">View History</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="recent-scans">
+                <h3>Recent Scans</h3>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentScansTable">
+                        <!-- Recent scans will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Scanner Page -->
+        <div class="page-content" id="scanner">
+            <div class="card">
+                <h2>Forensic File Analysis</h2>
+                <p>Upload a file for comprehensive forensic analysis. Our system will examine the file structure, metadata, and content for potential security threats, anomalies, and suspicious patterns.</p>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon"><i class="fas fa-file-upload"></i></div>
+                    <p class="upload-text">Drag & drop your file here or click to browse</p>
+                    <p style="font-size: 14px; color: #718096; margin-bottom: 15px;">Supported formats: Documents, Images, Archives, Executables</p>
+                    <button class="btn" id="browseBtn">Browse Files</button>
+                    <input type="file" id="fileInput" class="file-input">
+                </div>
+                <div id="selectedFile" class="selected-file" style="display: none;">
+                    <div class="file-icon"><i class="fas fa-file"></i></div>
+                    <span id="fileName"></span>
+                </div>
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress" id="progressBar"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Scanning file...</div>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn" id="scanBtn" disabled>Scan File</button>
+                    <button class="btn btn-secondary" id="resetBtn">Reset</button>
+                </div>
+            </div>
+            
+            <div class="card scan-results" id="scanResults">
+                <h2>Forensic Analysis Report</h2>
+                <p>Comprehensive security assessment based on file structure analysis, signature matching, and behavioral heuristics.</p>
+                
+                <div class="result-summary">
+                    <div class="summary-card total">
+                        <div class="summary-title">Files Scanned</div>
+                        <div class="summary-value" id="totalFiles">1</div>
+                    </div>
+                    <div class="summary-card safe">
+                        <div class="summary-title">Safe</div>
+                        <div class="summary-value" id="safeCount">0</div>
+                    </div>
+                    <div class="summary-card suspicious">
+                        <div class="summary-title">Suspicious</div>
+                        <div class="summary-value" id="suspiciousCount">0</div>
+                    </div>
+                    <div class="summary-card malicious">
+                        <div class="summary-title">Malicious</div>
+                        <div class="summary-value" id="maliciousCount">0</div>
+                    </div>
+                </div>
+                
+                <div class="result-details">
+                    <h3>Detailed Analysis</h3>
+                    <div class="detail-item">
+                        <div class="detail-name">File Name</div>
+                        <div class="detail-value" id="resultFileName">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-name">File Size</div>
+                        <div class="detail-value" id="resultFileSize">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-name">File Type</div>
+                        <div class="detail-value" id="resultFileType">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-name">MD5 Hash</div>
+                        <div class="detail-value" id="resultHash">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-name">SHA-256 Hash</div>
+                        <div class="detail-value" id="resultShaHash">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-name">Security Status</div>
+                        <div class="detail-value" id="resultStatus">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-name">Threat Indicators</div>
+                        <div class="detail-value" id="resultThreats">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-name">Risk Level</div>
+                        <div class="detail-value" id="resultRisk">-</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <h3>Recommendations</h3>
+                    <p id="recommendations">Based on the analysis, no specific recommendations are available.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- History Page -->
+        <div class="page-content" id="history">
+            <div class="card">
+                <h2>Scan History</h2>
+                <p>Review previous forensic analyses and their results. Use filters to find specific scans or export data for reporting purposes.</p>
+                
+                <div style="display: flex; gap: 15px; margin: 20px 0;">
+                    <input type="text" class="form-control" id="historySearch" placeholder="Search by filename...">
+                    <select class="form-control" id="historyFilter">
+                        <option value="">All Statuses</option>
+                        <option value="safe">Safe</option>
+                        <option value="suspicious">Suspicious</option>
+                        <option value="malicious">Malicious</option>
+                    </select>
+                    <button class="btn" id="searchHistoryBtn">Search</button>
+                    <button class="btn btn-secondary" id="exportHistoryBtn">Export</button>
+                </div>
+                
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Date</th>
+                            <th>File Type</th>
+                            <th>Status</th>
+                            <th>Risk Level</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <!-- History data will be populated here -->
+                    </tbody>
+                </table>
+                
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <div id="historyPaginationInfo">Showing 0-0 of 0 scans</div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" id="prevHistoryPage" disabled>Previous</button>
+                        <button class="btn btn-secondary" id="nextHistoryPage" disabled>Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Page -->
+        <div class="page-content" id="settings">
+            <div class="card">
+                <h2>Application Settings</h2>
+                <p>Configure the forensic scanner according to your security requirements and workflow preferences.</p>
+                
+                <div class="tab-container">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="general">General</div>
+                        <div class="tab" data-tab="scanning">Scanning</div>
+                        <div class="tab" data-tab="notifications">Notifications</div>
+                        <div class="tab" data-tab="advanced">Advanced</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="general-tab">
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label class="form-label">Application Language</label>
+                                <select class="form-control" id="languageSelect">
+                                    <option>English</option>
+                                    <option>Spanish</option>
+                                    <option>French</option>
+                                    <option>German</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Default Scan Mode</label>
+                                <select class="form-control" id="scanModeSelect">
+                                    <option>Quick Scan</option>
+                                    <option>Deep Scan</option>
+                                    <option>Custom Scan</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Results Display</label>
+                                <select class="form-control" id="resultsDisplaySelect">
+                                    <option>Detailed View</option>
+                                    <option>Summary View</option>
+                                </select>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox" id="autoUpdate" checked>
+                                <label for="autoUpdate" class="form-label">Automatically check for updates</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="scanning-tab">
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label class="form-label">Maximum File Size</label>
+                                <select class="form-control" id="maxFileSizeSelect">
+                                    <option>10 MB</option>
+                                    <option>50 MB</option>
+                                    <option>100 MB</option>
+                                    <option>500 MB</option>
+                                    <option>No Limit</option>
+                                </select>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox" id="heuristic" checked>
+                                <label for="heuristic" class="form-label">Enable heuristic analysis</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox" id="behavioral" checked>
+                                <label for="behavioral" class="form-label">Enable behavioral analysis</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox" id="cloudLookup">
+                                <label for="cloudLookup" class="form-label">Enable cloud threat intelligence lookup</label>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Scan Sensitivity</label>
+                                <select class="form-control" id="scanSensitivitySelect">
+                                    <option>Low (Fewer false positives)</option>
+                                    <option>Medium (Balanced)</option>
+                                    <option>High (More thorough)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="notifications-tab">
+                        <div class="settings-form">
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox" id="notifyComplete" checked>
+                                <label for="notifyComplete" class="form-label">Notify when scan completes</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox" id="notifyThreats" checked>
+                                <label for="notifyThreats" class="form-label">Notify when threats are detected</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox" id="emailReports">
+                                <label for="emailReports" class="form-label">Email scan reports</label>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Email Address for Reports</label>
+                                <input type="email" class="form-control" id="reportEmail" placeholder="your.email@example.com">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="advanced-tab">
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label class="form-label">Log Level</label>
+                                <select class="form-control" id="logLevelSelect">
+                                    <option>Minimal</option>
+                                    <option>Standard</option>
+                                    <option>Detailed</option>
+                                    <option>Debug</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Database Location</label>
+                                <input type="text" class="form-control" id="dbLocation" value="/var/lib/forensic-scanner/">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">API Endpoint</label>
+                                <input type="text" class="form-control" id="apiEndpoint" value="https://api.forensic-scanner.com/v1/">
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" class="checkbox" id="enableApi">
+                                <label for="enableApi" class="form-label">Enable REST API</label>
+                            </div>
+                            
+                            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                                <h3>Danger Zone</h3>
+                                <p style="margin: 10px 0; color: #718096;">These actions are irreversible. Proceed with caution.</p>
+                                <button class="btn btn-danger" id="clearHistoryBtn">Clear All Scan History</button>
+                                <button class="btn btn-danger" id="resetSettingsBtn" style="margin-left: 10px;">Reset All Settings</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: right; margin-top: 30px;">
+                    <button class="btn btn-secondary" id="cancelSettingsBtn">Cancel</button>
+                    <button class="btn" id="saveSettingsBtn">Save Settings</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Help Page -->
+        <div class="page-content" id="help">
+            <div class="card">
+                <h2>Help & Support</h2>
+                <p>Find answers to common questions, learn how to use the forensic scanner effectively, and get support when needed.</p>
+                
+                <div style="margin-top: 25px;">
+                    <h3>Frequently Asked Questions</h3>
+                    
+                    <div style="margin-top: 15px;">
+                        <div style="font-weight: 600; margin-bottom: 5px;">What file types can the scanner analyze?</div>
+                        <p style="margin-bottom: 15px;">The forensic scanner supports a wide range of file types including documents (PDF, DOC, DOCX), spreadsheets (XLS, XLSX), images (JPEG, PNG, GIF), archives (ZIP, RAR), executables (EXE, DLL), and scripts (JS, VBS, PS1).</p>
+                        
+                        <div style="font-weight: 600; margin-bottom: 5px;">How accurate is the threat detection?</div>
+                        <p style="margin-bottom: 15px;">Our multi-layered detection system combines signature-based scanning, heuristic analysis, and behavioral assessment to achieve over 98% detection accuracy with minimal false positives.</p>
+                        
+                        <div style="font-weight: 600; margin-bottom: 5px;">Can I scan files from cloud storage?</div>
+                        <p style="margin-bottom: 15px;">Currently, files need to be downloaded to your local system before scanning. We're working on direct cloud storage integration for future releases.</p>
+                        
+                        <div style="font-weight: 600; margin-bottom: 5px;">How long does a scan typically take?</div>
+                        <p style="margin-bottom: 15px;">Scan duration depends on file size and scan mode. Quick scans take seconds for most files, while deep scans of large files (100MB+) may take several minutes.</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <h3>Contact Support</h3>
+                    <p>If you need further assistance, our support team is available to help:</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+                        <div>
+                            <div style="font-weight: 600;">Email Support</div>
+                            <div>support@forensic-scanner.com</div>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600;">Knowledge Base</div>
+                            <div>https://docs.forensic-scanner.com</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Forensic File Scanner v2.1.4 | © 2023 Digital Forensics Inc. | For authorized use only
+        </div>
+    </div>
+
+    <script>
+        // Application state
+        const state = {
+            currentPage: 'dashboard',
+            scanHistory: [],
+            settings: {
+                language: 'English',
+                scanMode: 'Quick Scan',
+                resultsDisplay: 'Detailed View',
+                autoUpdate: true,
+                maxFileSize: '100 MB',
+                heuristic: true,
+                behavioral: true,
+                cloudLookup: false,
+                scanSensitivity: 'Medium (Balanced)',
+                notifyComplete: true,
+                notifyThreats: true,
+                emailReports: false,
+                reportEmail: '',
+                logLevel: 'Standard',
+                dbLocation: '/var/lib/forensic-scanner/',
+                apiEndpoint: 'https://api.forensic-scanner.com/v1/',
+                enableApi: false
+            },
+            historyPage: 1,
+            historyPageSize: 5,
+            filteredHistory: []
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Load saved state from localStorage
+            loadState();
+            
+            // Initialize navigation
+            initializeNavigation();
+            
+            // Initialize scanner functionality
+            initializeScanner();
+            
+            // Initialize history functionality
+            initializeHistory();
+            
+            // Initialize settings functionality
+            initializeSettings();
+            
+            // Render initial data
+            renderRecentScans();
+            renderHistoryTable();
+            updateSettingsForm();
+        }
+
+        function loadState() {
+            const savedState = localStorage.getItem('forensicScannerState');
+            if (savedState) {
+                const parsedState = JSON.parse(savedState);
+                Object.assign(state, parsedState);
+            }
+            
+            // Initialize with some sample data if empty
+            if (state.scanHistory.length === 0) {
+                state.scanHistory = [
+                    {
+                        id: 1,
+                        fileName: 'financial_report.pdf',
+                        date: '2023-10-15 14:32',
+                        fileType: 'PDF Document',
+                        status: 'safe',
+                        risk: 'Low',
+                        fileSize: '2.4 MB',
+                        hash: 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6',
+                        threats: 'None detected'
+                    },
+                    {
+                        id: 2,
+                        fileName: 'setup_utility.exe',
+                        date: '2023-10-14 09:15',
+                        fileType: 'Executable',
+                        status: 'malicious',
+                        risk: 'Critical',
+                        fileSize: '15.7 MB',
+                        hash: 'q1w2e3r4t5y6u7i8o9p0a1s2d3f4g5h6',
+                        threats: 'Known malware signature identified'
+                    },
+                    {
+                        id: 3,
+                        fileName: 'employee_data.xlsx',
+                        date: '2023-10-13 16:45',
+                        fileType: 'Spreadsheet',
+                        status: 'safe',
+                        risk: 'Low',
+                        fileSize: '0.8 MB',
+                        hash: 'z1x2c3v4b5n6m7q8w9e0r1t2y3u4i5o6',
+                        threats: 'None detected'
+                    },
+                    {
+                        id: 4,
+                        fileName: 'suspicious_script.js',
+                        date: '2023-10-12 11:20',
+                        fileType: 'JavaScript',
+                        status: 'suspicious',
+                        risk: 'Medium',
+                        fileSize: '0.1 MB',
+                        hash: 'p1o2i3u4y5t6r7e8w9q0a1s2d3f4g5h6',
+                        threats: 'Suspicious code patterns detected'
+                    }
+                ];
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem('forensicScannerState', JSON.stringify(state));
+        }
+
+        function initializeNavigation() {
+            // Navigation links
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const page = this.getAttribute('data-page');
+                    showPage(page);
+                    
+                    // Update active nav link
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Quick action buttons
+            document.getElementById('quickScanBtn').addEventListener('click', () => showPage('scanner'));
+            document.getElementById('quickHistoryBtn').addEventListener('click', () => showPage('history'));
+            
+            // Mobile menu button
+            document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
+            
+            // Show initial page
+            showPage(state.currentPage);
+        }
+
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update page title
+            const titles = {
+                'dashboard': 'Dashboard',
+                'scanner': 'File Scanner',
+                'history': 'Scan History',
+                'settings': 'Settings',
+                'help': 'Help & Support'
+            };
+            document.getElementById('pageTitle').textContent = titles[pageId];
+            
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('data-page') === pageId) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Update state
+            state.currentPage = pageId;
+            saveState();
+            
+            // Close mobile menu if open
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('active');
+            }
+            
+            // Refresh page-specific content
+            if (pageId === 'history') {
+                renderHistoryTable();
+            } else if (pageId === 'dashboard') {
+                renderRecentScans();
+            }
+        }
+
+        function initializeScanner() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const browseBtn = document.getElementById('browseBtn');
+            const selectedFile = document.getElementById('selectedFile');
+            const fileName = document.getElementById('fileName');
+            const scanBtn = document.getElementById('scanBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const scanResults = document.getElementById('scanResults');
+            
+            browseBtn.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    handleFileSelection(this.files[0]);
+                }
+            });
+            
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
+            
+            uploadArea.addEventListener('dragleave', function() {
+                uploadArea.classList.remove('drag-over');
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+                
+                if (e.dataTransfer.files.length > 0) {
+                    handleFileSelection(e.dataTransfer.files[0]);
+                }
+            });
+            
+            function handleFileSelection(file) {
+                fileName.textContent = file.name;
+                selectedFile.style.display = 'flex';
+                scanBtn.disabled = false;
+            }
+            
+            // Scan button functionality
+            scanBtn.addEventListener('click', function() {
+                // Show progress bar
+                progressContainer.style.display = 'block';
+                
+                // Simulate scanning progress
+                let progress = 0;
+                const interval = setInterval(function() {
+                    progress += Math.random() * 10;
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(interval);
+                        
+                        // Show results after scan completes
+                        setTimeout(showResults, 500);
+                    }
+                    
+                    progressBar.style.width = progress + '%';
+                    progressText.textContent = `Scanning file... ${Math.round(progress)}%`;
+                }, 200);
+            });
+            
+            // Reset button functionality
+            resetBtn.addEventListener('click', function() {
+                fileInput.value = '';
+                selectedFile.style.display = 'none';
+                scanBtn.disabled = true;
+                progressContainer.style.display = 'none';
+                scanResults.style.display = 'none';
+                progressBar.style.width = '0%';
+            });
+        }
+
+        function showResults() {
+            // Generate random results for demonstration
+            const fileTypes = ['PDF Document', 'JPEG Image', 'Executable', 'Text File', 'Archive', 'Spreadsheet'];
+            const statuses = ['safe', 'suspicious', 'malicious'];
+            const statusLabels = {
+                'safe': 'Safe',
+                'suspicious': 'Suspicious', 
+                'malicious': 'Malicious'
+            };
+            const threats = [
+                'None detected', 
+                'Suspicious code patterns detected', 
+                'Known malware signature identified',
+                'Behavioral anomalies detected',
+                'Obfuscated code identified'
+            ];
+            const risks = ['Low', 'Medium', 'High', 'Critical'];
+            const recommendations = {
+                'safe': 'No action required. File appears to be clean and safe for use.',
+                'suspicious': 'Exercise caution. File exhibits some suspicious characteristics. Consider further analysis before use.',
+                'malicious': 'Immediate action required. File contains malicious code. Isolate and delete this file immediately.'
+            };
+            
+            const fileName = document.getElementById('fileName').textContent;
+            const randomFileType = fileTypes[Math.floor(Math.random() * fileTypes.length)];
+            const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+            const randomThreat = threats[Math.floor(Math.random() * threats.length)];
+            const randomRisk = risks[Math.floor(Math.random() * risks.length)];
+            const fileSize = (Math.random() * 10).toFixed(2) + ' MB';
+            
+            // Update result counters based on status
+            document.getElementById('totalFiles').textContent = '1';
+            
+            if (randomStatus === 'safe') {
+                document.getElementById('safeCount').textContent = '1';
+                document.getElementById('suspiciousCount').textContent = '0';
+                document.getElementById('maliciousCount').textContent = '0';
+            } else if (randomStatus === 'suspicious') {
+                document.getElementById('safeCount').textContent = '0';
+                document.getElementById('suspiciousCount').textContent = '1';
+                document.getElementById('maliciousCount').textContent = '0';
+            } else {
+                document.getElementById('safeCount').textContent = '0';
+                document.getElementById('suspiciousCount').textContent = '0';
+                document.getElementById('maliciousCount').textContent = '1';
+            }
+            
+            // Update detailed results
+            document.getElementById('resultFileName').textContent = fileName;
+            document.getElementById('resultFileSize').textContent = fileSize;
+            document.getElementById('resultFileType').textContent = randomFileType;
+            document.getElementById('resultHash').textContent = generateRandomHash();
+            document.getElementById('resultShaHash').textContent = generateRandomShaHash();
+            document.getElementById('resultStatus').textContent = statusLabels[randomStatus];
+            document.getElementById('resultStatus').className = 'detail-value ' + randomStatus;
+            document.getElementById('resultThreats').textContent = randomThreat;
+            document.getElementById('resultRisk').textContent = randomRisk;
+            document.getElementById('recommendations').textContent = recommendations[randomStatus];
+            
+            // Show results section
+            document.getElementById('scanResults').style.display = 'block';
+            
+            // Add to history
+            const scanRecord = {
+                id: Date.now(),
+                fileName: fileName,
+                date: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                fileType: randomFileType,
+                status: randomStatus,
+                risk: randomRisk,
+                fileSize: fileSize,
+                hash: generateRandomHash(),
+                threats: randomThreat
+            };
+            
+            state.scanHistory.unshift(scanRecord);
+            saveState();
+            
+            // Update recent scans on dashboard
+            renderRecentScans();
+            
+            // Scroll to results
+            document.getElementById('scanResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function initializeHistory() {
+            // Search button
+            document.getElementById('searchHistoryBtn').addEventListener('click', function() {
+                state.historyPage = 1;
+                filterHistory();
+                renderHistoryTable();
+            });
+            
+            // Export button
+            document.getElementById('exportHistoryBtn').addEventListener('click', function() {
+                alert('Export functionality would be implemented in a real application. This would download a CSV file with all scan history data.');
+            });
+            
+            // Pagination buttons
+            document.getElementById('prevHistoryPage').addEventListener('click', function() {
+                if (state.historyPage > 1) {
+                    state.historyPage--;
+                    renderHistoryTable();
+                }
+            });
+            
+            document.getElementById('nextHistoryPage').addEventListener('click', function() {
+                const totalPages = Math.ceil(state.filteredHistory.length / state.historyPageSize);
+                if (state.historyPage < totalPages) {
+                    state.historyPage++;
+                    renderHistoryTable();
+                }
+            });
+            
+            // Initialize filtered history
+            state.filteredHistory = [...state.scanHistory];
+        }
+
+        function filterHistory() {
+            const searchTerm = document.getElementById('historySearch').value.toLowerCase();
+            const statusFilter = document.getElementById('historyFilter').value;
+            
+            state.filteredHistory = state.scanHistory.filter(scan => {
+                const matchesSearch = scan.fileName.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || scan.status === statusFilter;
+                
+                return matchesSearch && matchesStatus;
+            });
+        }
+
+        function renderHistoryTable() {
+            filterHistory();
+            
+            const tableBody = document.getElementById('historyTableBody');
+            const prevButton = document.getElementById('prevHistoryPage');
+            const nextButton = document.getElementById('nextHistoryPage');
+            const paginationInfo = document.getElementById('historyPaginationInfo');
+            
+            // Calculate pagination
+            const startIndex = (state.historyPage - 1) * state.historyPageSize;
+            const endIndex = Math.min(startIndex + state.historyPageSize, state.filteredHistory.length);
+            const currentPageData = state.filteredHistory.slice(startIndex, endIndex);
+            const totalPages = Math.ceil(state.filteredHistory.length / state.historyPageSize);
+            
+            // Update pagination info
+            paginationInfo.textContent = `Showing ${startIndex + 1}-${endIndex} of ${state.filteredHistory.length} scans`;
+            
+            // Update pagination buttons
+            prevButton.disabled = state.historyPage <= 1;
+            nextButton.disabled = state.historyPage >= totalPages;
+            
+            // Clear table
+            tableBody.innerHTML = '';
+            
+            // Populate table
+            currentPageData.forEach(scan => {
+                const row = document.createElement('tr');
+                
+                // Status badge
+                let statusBadge = '';
+                if (scan.status === 'safe') {
+                    statusBadge = '<span class="status-badge status-safe">Safe</span>';
+                } else if (scan.status === 'suspicious') {
+                    statusBadge = '<span class="status-badge status-suspicious">Suspicious</span>';
+                } else {
+                    statusBadge = '<span class="status-badge status-malicious">Malicious</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${scan.fileName}</td>
+                    <td>${scan.date}</td>
+                    <td>${scan.fileType}</td>
+                    <td>${statusBadge}</td>
+                    <td>${scan.risk}</td>
+                    <td>
+                        <button class="btn view-scan-btn" data-id="${scan.id}" style="padding: 5px 10px; font-size: 12px;">View</button>
+                        <button class="btn btn-secondary delete-scan-btn" data-id="${scan.id}" style="padding: 5px 10px; font-size: 12px;">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.view-scan-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const scanId = parseInt(this.getAttribute('data-id'));
+                    viewScanDetails(scanId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-scan-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const scanId = parseInt(this.getAttribute('data-id'));
+                    deleteScan(scanId);
+                });
+            });
+        }
+
+        function viewScanDetails(scanId) {
+            const scan = state.scanHistory.find(s => s.id === scanId);
+            if (scan) {
+                alert(`Scan Details:\n\nFile: ${scan.fileName}\nDate: ${scan.date}\nType: ${scan.fileType}\nStatus: ${scan.status}\nRisk: ${scan.risk}\nSize: ${scan.fileSize}\nThreats: ${scan.threats}`);
+            }
+        }
+
+        function deleteScan(scanId) {
+            if (confirm('Are you sure you want to delete this scan record?')) {
+                state.scanHistory = state.scanHistory.filter(s => s.id !== scanId);
+                saveState();
+                renderHistoryTable();
+                renderRecentScans();
+            }
+        }
+
+        function renderRecentScans() {
+            const tableBody = document.getElementById('recentScansTable');
+            
+            // Clear table
+            tableBody.innerHTML = '';
+            
+            // Get recent scans (most recent 3)
+            const recentScans = state.scanHistory.slice(0, 3);
+            
+            // Populate table
+            recentScans.forEach(scan => {
+                const row = document.createElement('tr');
+                
+                // Status badge
+                let statusBadge = '';
+                if (scan.status === 'safe') {
+                    statusBadge = '<span class="status-badge status-safe">Safe</span>';
+                } else if (scan.status === 'suspicious') {
+                    statusBadge = '<span class="status-badge status-suspicious">Suspicious</span>';
+                } else {
+                    statusBadge = '<span class="status-badge status-malicious">Malicious</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${scan.fileName}</td>
+                    <td>${scan.date}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn view-scan-btn" data-id="${scan.id}" style="padding: 5px 10px; font-size: 12px;">View Details</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners to action buttons
+            document.querySelectorAll('.view-scan-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const scanId = parseInt(this.getAttribute('data-id'));
+                    viewScanDetails(scanId);
+                });
+            });
+        }
+
+        function initializeSettings() {
+            // Tab navigation
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding tab content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Save settings button
+            document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+            
+            // Cancel settings button
+            document.getElementById('cancelSettingsBtn').addEventListener('click', function() {
+                updateSettingsForm();
+                alert('Settings changes discarded.');
+            });
+            
+            // Clear history button
+            document.getElementById('clearHistoryBtn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all scan history? This action cannot be undone.')) {
+                    state.scanHistory = [];
+                    saveState();
+                    renderHistoryTable();
+                    renderRecentScans();
+                    alert('Scan history cleared.');
+                }
+            });
+            
+            // Reset settings button
+            document.getElementById('resetSettingsBtn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to reset all settings to default values?')) {
+                    // Reset to default settings
+                    state.settings = {
+                        language: 'English',
+                        scanMode: 'Quick Scan',
+                        resultsDisplay: 'Detailed View',
+                        autoUpdate: true,
+                        maxFileSize: '100 MB',
+                        heuristic: true,
+                        behavioral: true,
+                        cloudLookup: false,
+                        scanSensitivity: 'Medium (Balanced)',
+                        notifyComplete: true,
+                        notifyThreats: true,
+                        emailReports: false,
+                        reportEmail: '',
+                        logLevel: 'Standard',
+                        dbLocation: '/var/lib/forensic-scanner/',
+                        apiEndpoint: 'https://api.forensic-scanner.com/v1/',
+                        enableApi: false
+                    };
+                    
+                    saveState();
+                    updateSettingsForm();
+                    alert('All settings have been reset to default values.');
+                }
+            });
+        }
+
+        function updateSettingsForm() {
+            // Update form fields with current settings
+            document.getElementById('languageSelect').value = state.settings.language;
+            document.getElementById('scanModeSelect').value = state.settings.scanMode;
+            document.getElementById('resultsDisplaySelect').value = state.settings.resultsDisplay;
+            document.getElementById('autoUpdate').checked = state.settings.autoUpdate;
+            document.getElementById('maxFileSizeSelect').value = state.settings.maxFileSize;
+            document.getElementById('heuristic').checked = state.settings.heuristic;
+            document.getElementById('behavioral').checked = state.settings.behavioral;
+            document.getElementById('cloudLookup').checked = state.settings.cloudLookup;
+            document.getElementById('scanSensitivitySelect').value = state.settings.scanSensitivity;
+            document.getElementById('notifyComplete').checked = state.settings.notifyComplete;
+            document.getElementById('notifyThreats').checked = state.settings.notifyThreats;
+            document.getElementById('emailReports').checked = state.settings.emailReports;
+            document.getElementById('reportEmail').value = state.settings.reportEmail;
+            document.getElementById('logLevelSelect').value = state.settings.logLevel;
+            document.getElementById('dbLocation').value = state.settings.dbLocation;
+            document.getElementById('apiEndpoint').value = state.settings.apiEndpoint;
+            document.getElementById('enableApi').checked = state.settings.enableApi;
+        }
+
+        function saveSettings() {
+            // Update settings from form fields
+            state.settings.language = document.getElementById('languageSelect').value;
+            state.settings.scanMode = document.getElementById('scanModeSelect').value;
+            state.settings.resultsDisplay = document.getElementById('resultsDisplaySelect').value;
+            state.settings.autoUpdate = document.getElementById('autoUpdate').checked;
+            state.settings.maxFileSize = document.getElementById('maxFileSizeSelect').value;
+            state.settings.heuristic = document.getElementById('heuristic').checked;
+            state.settings.behavioral = document.getElementById('behavioral').checked;
+            state.settings.cloudLookup = document.getElementById('cloudLookup').checked;
+            state.settings.scanSensitivity = document.getElementById('scanSensitivitySelect').value;
+            state.settings.notifyComplete = document.getElementById('notifyComplete').checked;
+            state.settings.notifyThreats = document.getElementById('notifyThreats').checked;
+            state.settings.emailReports = document.getElementById('emailReports').checked;
+            state.settings.reportEmail = document.getElementById('reportEmail').value;
+            state.settings.logLevel = document.getElementById('logLevelSelect').value;
+            state.settings.dbLocation = document.getElementById('dbLocation').value;
+            state.settings.apiEndpoint = document.getElementById('apiEndpoint').value;
+            state.settings.enableApi = document.getElementById('enableApi').checked;
+            
+            saveState();
+            alert('Settings saved successfully.');
+        }
+
+        // Helper function to generate a random MD5-like hash
+        function generateRandomHash() {
+            const chars = '0123456789abcdef';
+            let hash = '';
+            for (let i = 0; i < 32; i++) {
+                hash += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return hash;
+        }
+        
+        // Helper function to generate a random SHA-256-like hash
+        function generateRandomShaHash() {
+            const chars = '0123456789abcdef';
+            let hash = '';
+            for (let i = 0; i < 64; i++) {
+                hash += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return hash;
+        }
+    </script>
+</body>
+</html>
